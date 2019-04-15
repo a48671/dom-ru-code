@@ -10,14 +10,20 @@ export const Wrapper = styled.div.attrs({className: 'head'})`
 
 export const Logo = styled.div.attrs({className: 'head__logo'})`
 	width: 70px;
+	height: 70px;
 	img {
-		width: 100%;
+		max-width: 100%;
+		max-height: 100%;
 	}
 `;
 
 export const Title = styled.h1.attrs({className: 'head__title'})`
 	width: calc(100% - 70px);
 	font-size: 24px;
+	font-weight: 600;
 	color: ${colors.dark};
 	padding-left: 30px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 `;

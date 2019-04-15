@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import {Wrapper, Container } from './styled';
 
 import Head from './components/Head';
+import TelecastList from "./components/TelecastList";
 
 class App extends Component {
 	render() {
@@ -10,6 +11,7 @@ class App extends Component {
 			<Wrapper>
 				<Container>
 					<Head />
+					<TelecastList />
 				</Container>
 			</Wrapper>
 		);
