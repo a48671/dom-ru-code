@@ -428,15 +428,9 @@ template {
 ul {
   list-style-type: none;
 }
-*{
-  margin: 0;
-  padding: 0;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  font-family: sans-serif;
-}
+
 p, h1, h2, h3, h4 {
+  margin: 0;
   font-weight: 100;
 }
 
