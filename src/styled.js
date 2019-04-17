@@ -15,5 +15,6 @@ export const Container = styled.div.attrs({className: 'container'})`
 	display: block;
 	width: 100%;
 	max-width: 500px;
+	max-height: 100vh;
 	background-color:${colors.white};
 `;

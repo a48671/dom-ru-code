@@ -21,9 +21,15 @@ export const Title = styled.h1.attrs({className: 'head__title'})`
 	width: calc(100% - 70px);
 	font-size: 24px;
 	font-weight: 600;
-	color: ${colors.dark};
 	padding-left: 30px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	a {
+		color: ${colors.blue};
+		text-decoration: underline;
+	}
+	@media (max-width: 430px) {
+         font-size: 22px;
+  	}
 `;
