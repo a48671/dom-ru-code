@@ -1,17 +1,17 @@
-import React, { Component } from 'react'
-import axios from 'axios'
-import { formatDate } from './helpers/formatDate'
-import { reduceTelecasts } from './helpers/reduceTelecasts'
-import moment from 'moment'
+import React, { Component } from 'react';
+import axios from 'axios';
+import { formatDate } from './helpers/formatDate';
+import { reduceTelecasts } from './helpers/reduceTelecasts';
+import moment from 'moment';
 
-import { Wrapper, Container } from './styled'
+import { Wrapper, Container } from './styled';
 
-import Head from './components/Head'
-import TelecastList from './components/TelecastList'
+import Head from './components/Head';
+import TelecastList from './components/TelecastList';
 
-const chid = '148'
-const domain = 'perm'
-const urlAPI = 'https://epg.domru.ru'
+const chid = '148';
+const domain = 'perm';
+const urlAPI = 'https://epg.domru.ru';
 
 class App extends Component {
   state = {
@@ -19,55 +19,55 @@ class App extends Component {
     logo: '',
     url: '',
     info: [],
-  }
+  };
 
   componentDidMount() {
-    this.getInfoProgramm()
-    this.getTelecasts()
+    this.getInfoProgramm();
+    this.getTelecasts();
   }
 
   getInfoProgramm = async () => {
-    const localInfo = JSON.parse(window.localStorage.getItem('info'))
+    const localInfo = JSON.parse(window.localStorage.getItem('info'));
 
     if (localInfo && localInfo.title && localInfo.logo && localInfo.url) {
       this.setState({
         title: localInfo.title,
         logo: localInfo.logo,
         url: localInfo.url,
-      })
+      });
 
-      return
+      return;
     }
 
     try {
       const responce = await axios.get(
         `${urlAPI}/channel/info?chid=${chid}&domain=${domain}`
-      )
+      );
 
-      const data = responce.data
+      const data = responce.data;
 
       this.setState({
         title: data.title,
         logo: urlAPI + data.logo,
         url: data.url,
-      })
+      });
 
-      window.localStorage.setItem('info', JSON.stringify(this.state))
+      window.localStorage.setItem('info', JSON.stringify(this.state));
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   getTelecasts = async () => {
-    const currentDate = moment().valueOf()
+    const currentDate = moment().valueOf();
 
     const from = `${formatDate(currentDate - 86400000)}+${encodeURIComponent(
       '18:00:00'
-    )}`
-    const to = `${formatDate(currentDate)}+${encodeURIComponent('23:59:59')}`
+    )}`;
+    const to = `${formatDate(currentDate)}+${encodeURIComponent('23:59:59')}`;
 
-    const dateRange = JSON.parse(window.localStorage.getItem('rangeDate'))
-    const localInfo = JSON.parse(window.localStorage.getItem('info'))
+    const dateRange = JSON.parse(window.localStorage.getItem('rangeDate'));
+    const localInfo = JSON.parse(window.localStorage.getItem('info'));
 
     if (
       dateRange &&
@@ -78,32 +78,32 @@ class App extends Component {
       const newTelecastsList = reduceTelecasts({
         data: localInfo.info,
         currentDate,
-      })
+      });
 
       this.setState({
         ...localInfo,
         info: [...newTelecastsList],
-      })
+      });
 
-      this.allUpdate(newTelecastsList)
+      this.allUpdate(newTelecastsList);
 
-      return
+      return;
     }
 
     try {
       const responce = await axios.get(
         `${urlAPI}/program/list?date_from=${from}&date_to=${to}&xvid[0]=1&chid=${chid}&domain=${domain}`
-      )
+      );
 
-      const telecasts = responce.data[1]
+      const telecasts = responce.data[1];
 
-      const currentDate = moment().valueOf()
+      const currentDate = moment().valueOf();
 
       this.setState({
         info: reduceTelecasts({ data: telecasts, currentDate: currentDate }),
-      })
+      });
 
-      window.localStorage.setItem('info', JSON.stringify(this.state))
+      window.localStorage.setItem('info', JSON.stringify(this.state));
 
       window.localStorage.setItem(
         'rangeDate',
@@ -117,58 +117,58 @@ class App extends Component {
             moment.ISO_8601
           ).valueOf(),
         })
-      )
+      );
 
-      this.allUpdate(this.state.info)
+      this.allUpdate(this.state.info);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   allUpdate = info => {
-    const currentDate = moment().valueOf()
+    const currentDate = moment().valueOf();
 
     this.updateFromServer(
       currentDate,
       moment(formatDate(currentDate) + ' 23:59:59').valueOf()
-    )
+    );
 
-    this.updateTelecasts(info, currentDate)
-  }
+    this.updateTelecasts(info, currentDate);
+  };
 
   updateTelecasts = (info, currentDate) => {
-    const nextUpdate = info[2].end - currentDate + 1000
+    const nextUpdate = info[2].end - currentDate + 1000;
 
-    console.log('Next update from state: ', nextUpdate / 1000 / 60, ' min')
+    console.log('Next update from state: ', nextUpdate / 1000 / 60, ' min');
 
     const update = setTimeout(() => {
-      console.log('updating from state')
-      clearTimeout(update)
+      console.log('updating from state');
+      clearTimeout(update);
       this.setState({
         info: reduceTelecasts({ data: info, currentDate: moment().valueOf() }),
-      })
-      this.updateTelecasts(this.state.info, moment().valueOf())
-    }, nextUpdate)
-  }
+      });
+      this.updateTelecasts(this.state.info, moment().valueOf());
+    }, nextUpdate);
+  };
 
   updateFromServer = (currentDate, to) => {
-    const nextUpdate = to - currentDate + 1000
+    const nextUpdate = to - currentDate + 1000;
 
     console.log(
       'Next update from server: ',
       nextUpdate / 1000 / 60 / 60,
       ' hours'
-    )
+    );
 
     const update = setTimeout(() => {
-      console.log('updating from server')
-      clearTimeout(update)
-      this.getTelecasts()
-    }, nextUpdate)
-  }
+      console.log('updating from server');
+      clearTimeout(update);
+      this.getTelecasts();
+    }, nextUpdate);
+  };
 
   render() {
-    const { title, logo, url, info } = this.state
+    const { title, logo, url, info } = this.state;
 
     return (
       <Wrapper>
@@ -177,8 +177,8 @@ class App extends Component {
           <TelecastList info={info} />
         </Container>
       </Wrapper>
-    )
+    );
   }
 }
 
-export default App
+export default App;
