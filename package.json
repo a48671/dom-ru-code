@@ -24,7 +24,10 @@
   ],
   "devDependencies": {
     "axios": "^0.18.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.12.1",
     "prop-types": "^15.7.2",
+    "react-test-renderer": "^16.8.6",
     "reselect": "^4.0.0",
     "styled-components": "^4.2.0"
   }

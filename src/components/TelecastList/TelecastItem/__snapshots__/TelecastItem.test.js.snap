@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TelecastItem render correctly 1`] = `
+<div
+  className="sc-bdVaJa telecast-item jefSHH"
+  type="isOver"
+>
+  <div
+    className="sc-bwzfXH telecast-time gAnrFN"
+  >
+    11:00
+  </div>
+  <h1
+    className="sc-htpNat head__title kCVlzB"
+  >
+    Title
+  </h1>
+</div>
+`;
