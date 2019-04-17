@@ -22,12 +22,23 @@ class App extends Component {
 	};
 
 	componentDidMount() {
-
 		this.getInfoProgramm();
 		this.getTelecasts();
 	};
 
 	getInfoProgramm = () => {
+
+		const localInfo = JSON.parse(window.localStorage.getItem('info'));
+
+		if(localInfo.title && localInfo.logo && localInfo.url) {
+			this.setState({
+				title: localInfo.title,
+				logo: localInfo.logo,
+				url: localInfo.url
+			});
+			return;
+		}
+
 		axios
 			.get(`${urlAPI}/channel/info?chid=${chid}&domain=${domain}`)
 			.then(res => {
@@ -35,7 +46,8 @@ class App extends Component {
 					title: res.data.title,
 					logo: urlAPI + res.data.logo,
 					url: res.data.url
-				})
+				});
+				window.localStorage.setItem('info', JSON.stringify(this.state));
 			})
 			.catch(error => console.log(error));
 	};
@@ -43,18 +55,47 @@ class App extends Component {
 	getTelecasts = () => {
 		const currentDate = Date.parse(new Date());
 
-		const from = `${formatDate(currentDate)}+${encodeURIComponent('00:00:00')}`;
+		const from = `${formatDate(currentDate - 86400000)}+${encodeURIComponent('18:00:00')}`;
 		const to = `${formatDate(currentDate)}+${encodeURIComponent('23:59:59')}`;
+
+		const dateRange = JSON.parse(window.localStorage.getItem('rangeDate'));
+		const localInfo = JSON.parse(window.localStorage.getItem('info'));
+
+		if(dateRange && localInfo && dateRange.from <= currentDate && dateRange.to >= currentDate) {
+
+			const newTelecastsList = reduceTelecasts({data: localInfo.info, currentDate})
+
+			this.setState({
+				...localInfo,
+				info: [...newTelecastsList]
+			});
+
+			this.updateFromServer(currentDate, Date.parse(formatDate(currentDate) + ' 23:59:59'));
+
+			this.updateTelecasts(newTelecastsList, currentDate);
+
+			return;
+		}
 
 		axios
 			.get(`${urlAPI}/program/list?date_from=${from}&date_to=${to}&xvid[0]=1&chid=${chid}&domain=${domain}`)
 			.then(res => {
 
+				const currentDate = Date.parse(new Date());
+
 				this.setState({
-					info: reduceTelecasts(res.data[1], currentDate)
+					info: reduceTelecasts({data: res.data[1], currentDate: currentDate})
 				});
 
-				this.updateTelecasts(this.state.info, Date.parse(new Date()));
+				window.localStorage.setItem('info', JSON.stringify(this.state));
+				window.localStorage.setItem('rangeDate', JSON.stringify({
+					from: Date.parse(formatDate(currentDate - 86400000) + ' 18:00:0'),
+					to: Date.parse(formatDate(currentDate) + ' 23:59:59')
+				}));
+
+				this.updateFromServer(currentDate, Date.parse(formatDate(currentDate) + ' 23:59:59'));
+
+				this.updateTelecasts(this.state.info, currentDate);
 
 			})
 			.catch(error => console.log(error));
@@ -64,17 +105,30 @@ class App extends Component {
 
 		const nextUpdate = info[2].end - currentDate + 1000;
 
-		console.log('Next update: ', nextUpdate);
+		console.log('Next update from state: ', nextUpdate / 1000 / 60, ' min');
 
 		const update = setTimeout(() => {
-			console.log('updating');
+			console.log('updating from state');
 			clearTimeout(update);
 			this.setState({
-				info: reduceTelecasts(info, Date.parse(new Date()))
+				info: reduceTelecasts({data: info, currentDate: Date.parse(new Date())})
 			});
 			this.updateTelecasts(this.state.info, Date.parse(new Date()));
 		}, nextUpdate);
-	}
+	};
+
+	updateFromServer = (currentDate, to) => {
+
+		const nextUpdate = to - currentDate + 1000;
+
+		console.log('Next update from server: ', nextUpdate / 1000 / 60 / 60, ' hours');
+
+		const update = setTimeout(() => {
+			console.log('updating from server');
+			clearTimeout(update);
+			this.getTelecasts();
+		}, nextUpdate);
+	};
 
 	render() {
 
