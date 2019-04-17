@@ -30,7 +30,7 @@ describe('TelecasrsList', () => {
 				info={info2}
 			/>
 		);
-		expect(container.find('.telecast-item').length).toEqual(info2.length);
+		expect(container.find('.telecast-item').length).toEqual(1);
 	});
 
 });

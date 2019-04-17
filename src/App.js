@@ -30,12 +30,14 @@ class App extends Component {
 
 		const localInfo = JSON.parse(window.localStorage.getItem('info'));
 
-		if(localInfo.title && localInfo.logo && localInfo.url) {
+		if(localInfo && localInfo.title && localInfo.logo && localInfo.url) {
+
 			this.setState({
 				title: localInfo.title,
 				logo: localInfo.logo,
 				url: localInfo.url
 			});
+
 			return;
 		}
 
@@ -70,9 +72,7 @@ class App extends Component {
 				info: [...newTelecastsList]
 			});
 
-			this.updateFromServer(currentDate, Date.parse(formatDate(currentDate) + ' 23:59:59'));
-
-			this.updateTelecasts(newTelecastsList, currentDate);
+			this.allUpdate(newTelecastsList);
 
 			return;
 		}
@@ -93,12 +93,19 @@ class App extends Component {
 					to: Date.parse(formatDate(currentDate) + ' 23:59:59')
 				}));
 
-				this.updateFromServer(currentDate, Date.parse(formatDate(currentDate) + ' 23:59:59'));
-
-				this.updateTelecasts(this.state.info, currentDate);
+				this.allUpdate(this.state.info);
 
 			})
 			.catch(error => console.log(error));
+	};
+
+	allUpdate = (info) => {
+
+		const currentDate = Date.parse(new Date());
+
+		this.updateFromServer(currentDate, Date.parse(formatDate(currentDate) + ' 23:59:59'));
+
+		this.updateTelecasts(info, currentDate);
 	};
 
 	updateTelecasts = (info, currentDate) => {
