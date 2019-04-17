@@ -26,7 +26,7 @@ class App extends Component {
     this.getTelecasts()
   }
 
-  getInfoProgramm = () => {
+  getInfoProgramm = async () => {
     const localInfo = JSON.parse(window.localStorage.getItem('info'))
 
     if (localInfo && localInfo.title && localInfo.logo && localInfo.url) {
@@ -39,20 +39,26 @@ class App extends Component {
       return
     }
 
-    axios
-      .get(`${urlAPI}/channel/info?chid=${chid}&domain=${domain}`)
-      .then(res => {
-        this.setState({
-          title: res.data.title,
-          logo: urlAPI + res.data.logo,
-          url: res.data.url,
-        })
-        window.localStorage.setItem('info', JSON.stringify(this.state))
+    try {
+      const responce = await axios.get(
+        `${urlAPI}/channel/info?chid=${chid}&domain=${domain}`
+      )
+
+      const data = responce.data
+
+      this.setState({
+        title: data.title,
+        logo: urlAPI + data.logo,
+        url: data.url,
       })
-      .catch(error => console.log(error))
+
+      window.localStorage.setItem('info', JSON.stringify(this.state))
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  getTelecasts = () => {
+  getTelecasts = async () => {
     const currentDate = moment().valueOf()
 
     const from = `${formatDate(currentDate - 86400000)}+${encodeURIComponent(
@@ -84,37 +90,39 @@ class App extends Component {
       return
     }
 
-    axios
-      .get(
+    try {
+      const responce = await axios.get(
         `${urlAPI}/program/list?date_from=${from}&date_to=${to}&xvid[0]=1&chid=${chid}&domain=${domain}`
       )
-      .then(res => {
-        const telecasts = res.data[1]
 
-        const currentDate = moment().valueOf()
+      const telecasts = responce.data[1]
 
-        this.setState({
-          info: reduceTelecasts({ data: telecasts, currentDate: currentDate }),
-        })
+      const currentDate = moment().valueOf()
 
-        window.localStorage.setItem('info', JSON.stringify(this.state))
-        window.localStorage.setItem(
-          'rangeDate',
-          JSON.stringify({
-            from: moment(
-              formatDate(currentDate - 86400000) + 'T18:00:0',
-              moment.ISO_8601
-            ).valueOf(),
-            to: moment(
-              formatDate(currentDate) + 'T23:59:59',
-              moment.ISO_8601
-            ).valueOf(),
-          })
-        )
-
-        this.allUpdate(this.state.info)
+      this.setState({
+        info: reduceTelecasts({ data: telecasts, currentDate: currentDate }),
       })
-      .catch(error => console.log(error))
+
+      window.localStorage.setItem('info', JSON.stringify(this.state))
+
+      window.localStorage.setItem(
+        'rangeDate',
+        JSON.stringify({
+          from: moment(
+            formatDate(currentDate - 86400000) + 'T18:00:0',
+            moment.ISO_8601
+          ).valueOf(),
+          to: moment(
+            formatDate(currentDate) + 'T23:59:59',
+            moment.ISO_8601
+          ).valueOf(),
+        })
+      )
+
+      this.allUpdate(this.state.info)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   allUpdate = info => {
