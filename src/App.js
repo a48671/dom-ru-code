@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import Promise from 'promise-polyfill';
+// import Promise from 'promise-polyfill';
+import 'isomorphic-fetch';
 import { formatDate } from './helpers/formatDate';
 import { reduceTelecasts } from './helpers/reduceTelecasts';
 import moment from 'moment';
@@ -12,6 +13,8 @@ import TelecastList from './components/TelecastList';
 const chid = '148';
 const domain = 'perm';
 const urlAPI = 'https://epg.domru.ru';
+
+// window.Promise = Promise;
 
 class App extends Component {
   state = {
@@ -39,14 +42,8 @@ class App extends Component {
       return;
     }
 
-    const promise = new Promise((res, rej) => {
-      fetch(`${urlAPI}/channel/info?chid=${chid}&domain=${domain}`)
-        .then(data => data.json())
-        .then(data => res(data))
-        .catch(error => rej(error));
-    });
-
-    promise
+    fetch(`${urlAPI}/channel/info?chid=${chid}&domain=${domain}`)
+      .then(data => data.json())
       .then(data => {
         this.setState({
           title: data.title,
@@ -91,16 +88,10 @@ class App extends Component {
       return;
     }
 
-    const promise = new Promise((res, rej) => {
-      fetch(
-        `${urlAPI}/program/list?date_from=${from}&date_to=${to}&xvid[0]=1&chid=${chid}&domain=${domain}`
-      )
-        .then(data => data.json())
-        .then(data => res(data))
-        .catch(error => rej(error));
-    });
-
-    promise
+    fetch(
+      `${urlAPI}/program/list?date_from=${from}&date_to=${to}&xvid[0]=1&chid=${chid}&domain=${domain}`
+    )
+      .then(data => data.json())
       .then(data => {
         const telecasts = data[1];
 
