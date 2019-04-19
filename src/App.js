@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import Promise from 'promise-polyfill';
 import 'isomorphic-fetch';
 import { formatDate } from './helpers/formatDate';
 import { reduceTelecasts } from './helpers/reduceTelecasts';
@@ -13,8 +12,6 @@ import TelecastList from './components/TelecastList';
 const chid = '148';
 const domain = 'perm';
 const urlAPI = 'https://epg.domru.ru';
-
-// window.Promise = Promise;
 
 class App extends Component {
   state = {
