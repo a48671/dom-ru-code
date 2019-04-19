@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import Promise from 'promise-polyfill';
 import { formatDate } from './helpers/formatDate';
 import { reduceTelecasts } from './helpers/reduceTelecasts';
 import moment from 'moment';
@@ -39,23 +39,24 @@ class App extends Component {
       return;
     }
 
-    try {
-      const responce = await axios.get(
-        `${urlAPI}/channel/info?chid=${chid}&domain=${domain}`
-      );
+    const promise = new Promise((res, rej) => {
+      fetch(`${urlAPI}/channel/info?chid=${chid}&domain=${domain}`)
+        .then(data => data.json())
+        .then(data => res(data))
+        .catch(error => rej(error));
+    });
 
-      const data = responce.data;
+    promise
+      .then(data => {
+        this.setState({
+          title: data.title,
+          logo: urlAPI + data.logo,
+          url: data.url,
+        });
 
-      this.setState({
-        title: data.title,
-        logo: urlAPI + data.logo,
-        url: data.url,
-      });
-
-      window.localStorage.setItem('info', JSON.stringify(this.state));
-    } catch (error) {
-      console.log(error);
-    }
+        window.localStorage.setItem('info', JSON.stringify(this.state));
+      })
+      .catch(error => console.log(error));
   };
 
   getTelecasts = async () => {
@@ -90,39 +91,44 @@ class App extends Component {
       return;
     }
 
-    try {
-      const responce = await axios.get(
+    const promise = new Promise((res, rej) => {
+      fetch(
         `${urlAPI}/program/list?date_from=${from}&date_to=${to}&xvid[0]=1&chid=${chid}&domain=${domain}`
-      );
+      )
+        .then(data => data.json())
+        .then(data => res(data))
+        .catch(error => rej(error));
+    });
 
-      const telecasts = responce.data[1];
+    promise
+      .then(data => {
+        const telecasts = data[1];
 
-      const currentDate = moment().valueOf();
+        const currentDate = moment().valueOf();
 
-      this.setState({
-        info: reduceTelecasts({ data: telecasts, currentDate: currentDate }),
-      });
+        this.setState({
+          info: reduceTelecasts({ data: telecasts, currentDate: currentDate }),
+        });
 
-      window.localStorage.setItem('info', JSON.stringify(this.state));
+        window.localStorage.setItem('info', JSON.stringify(this.state));
 
-      window.localStorage.setItem(
-        'rangeDate',
-        JSON.stringify({
-          from: moment(
-            formatDate(currentDate - 86400000) + 'T18:00:0',
-            moment.ISO_8601
-          ).valueOf(),
-          to: moment(
-            formatDate(currentDate) + 'T23:59:59',
-            moment.ISO_8601
-          ).valueOf(),
-        })
-      );
+        window.localStorage.setItem(
+          'rangeDate',
+          JSON.stringify({
+            from: moment(
+              formatDate(currentDate - 86400000) + 'T18:00:0',
+              moment.ISO_8601
+            ).valueOf(),
+            to: moment(
+              formatDate(currentDate) + 'T23:59:59',
+              moment.ISO_8601
+            ).valueOf(),
+          })
+        );
 
-      this.allUpdate(this.state.info);
-    } catch (error) {
-      console.log(error);
-    }
+        this.allUpdate(this.state.info);
+      })
+      .catch(error => console.log(error));
   };
 
   allUpdate = info => {
