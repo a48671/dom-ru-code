@@ -26,7 +26,7 @@ class App extends Component {
     this.getTelecasts();
   }
 
-  getInfoProgramm = async () => {
+  getInfoProgramm = () => {
     const localInfo = JSON.parse(window.localStorage.getItem('info'));
 
     if (localInfo && localInfo.title && localInfo.logo && localInfo.url) {
@@ -59,7 +59,7 @@ class App extends Component {
       .catch(error => console.log(error));
   };
 
-  getTelecasts = async () => {
+  getTelecasts = () => {
     const currentDate = moment().valueOf();
 
     const from = `${formatDate(currentDate - 86400000)}+${encodeURIComponent(
